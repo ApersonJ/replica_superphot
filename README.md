@@ -75,7 +75,7 @@ Todos los comandos se lanzan desde la raíz del repositorio. Los notebooks usan 
 | 3. `03_preprocesamiento.ipynb` | Flujo, recorte de colas y cortes de calidad | `data/processed/`, `data/resultado_cortes.csv` | minutos |
 | 4. notebook del modelo y los ajustes | Ecuación 1, ajuste por banda con `curve_fit`, corte de χ² y tabla de features | `data/ajustes.csv`, `data/features.csv` | minutos |
 | 5. `05_clasificador.ipynb` | LightGBM con 10 folds estratificados y comparación con el paper | tablas en `results/` | minutos |
-| 6. `06_gap_balanceo.ipynb` | Comparación de métodos de balanceo con 5 semillas | `results/comparacion_balanceo.csv`, `results/balanceo_comp_pureza.png` | decenas de minutos |
+| 6. `06_balanceo.ipynb` | Comparación de métodos de balanceo con 5 semillas | `results/comparacion_balanceo.csv`, `results/balanceo_comp_pureza.png` | decenas de minutos |
 
 > Ajusta los nombres de los notebooks a los que tengas en `notebooks/`. El orden es el de la tabla.
 
@@ -107,14 +107,13 @@ El script de descarga se puede detener y volver a lanzar sin perder lo descargad
 | Corrección por extinción de la Vía Láctea | Sí | **No aplicada** |
 | Corte de calidad del ajuste | χ² ≤ 1,2 | χ² conjunto ≤ 3, elegido mirando la distribución (con otra definición de χ², sin `σ_extra`, no es comparable) |
 | Detecciones con diferencia negativa (`isdiffpos = -1`) | No se detalla | Descartadas (78 objetos, todos de 2018, quedan sin puntos) |
-| Error del flujo | No se da la fórmula | Propagación de errores: σ_f = 0,4·ln(10)·f·σ_m |
 | Recorte de colas | Apéndice A | Interpretación propia del algoritmo; la amplitud se define como máximo menos mínimo |
 | `beta` | Rango 0 a 0,03 | Mínimo de 1e-4 para evitar logaritmos infinitos en las razones g/r |
 | Logaritmos de la Tabla 2 | No se indica la base | Se supone base 10 (los centros de los priors lo respaldan) |
 | Regularización de LightGBM | "Regularización 5" | Se interpreta como L2 (`reg_lambda=5`); sin GOSS ni partición de validación interna |
 | Datos | 9.526 objetos de TNS, 6.123 tras los cortes | `training_set.csv` del repositorio de los autores (5.735 objetos; 5.356 en las 5 clases) |
 
-Embudo de datos de esta réplica: 5.356 objetos → 5.224 pasan los cortes de calidad → 5.223 ajustes
+5.356 objetos → 5.224 pasan los cortes de calidad → 5.223 ajustes
 convergen → **4.902** curvas tras el corte de χ² (SN Ia 3.694, SN II 763, SN Ib/c 189, SN IIn 187, SLSN-I 69).
 
 ## 7. Resultados principales
@@ -158,15 +157,8 @@ Conclusiones, con los límites de tener solo 5 semillas y 69 curvas en SLSN-I:
 - Ningún método de balanceo cierra la diferencia de F1 con el paper (0,61), lo que sugiere que pesa más la
   calidad de las features (ajuste por banda, sin `σ_extra`) que el balanceo.
 
-## 8. Limitaciones
 
-- No se aplicó la corrección por extinción de la Vía Láctea.
-- Los ajustes por banda son poco fiables en curvas con pocos puntos (alrededor del 31 % de las curvas
-  tiene 8 puntos o menos en la banda g) y `beta` aparece muy a menudo en los límites del rango.
-- SLSN-I tiene solo 69 curvas, por lo que sus métricas varían mucho entre semillas.
-- Las curvas de ALeRCE y la lista de objetos pueden diferir de los usados por los autores.
-
-## 9. Referencias
+## 8. Referencias
 
 - de Soto, K. M., Villar, A., Berger, E., et al. 2024, *Superphot+: Realtime Fitting and Classification of
   Supernova Light Curves*, arXiv:2403.07975. Código: https://github.com/VTDA-Group/superphot-plus
