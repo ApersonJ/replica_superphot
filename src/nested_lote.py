@@ -1,6 +1,5 @@
 import os
 
-# Un hilo por proceso: evita que numpy compita con joblib por los nucleos
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
 os.environ["MKL_NUM_THREADS"] = "1"
@@ -26,8 +25,7 @@ SALIDA = Path("data/nested_resultados.jsonl")
 N_DRAWS = 100          # muestras posteriores que se guardan por banda
 SEED = 0
 
-# Tabla 2 del paper: (media, desviacion, minimo, maximo) de la gaussiana subyacente.
-# Se supone que los logaritmos son en base 10.
+
 PRIORS = np.array([
     [0.096, 0.058, -0.3, 0.5],      # log10(A / Fmax)
     [8.3e-3, 3.9e-3, 0.0, 0.03],    # beta
@@ -100,8 +98,7 @@ def ajusta_dynesty(c, t_ref, seed):
         lambda u: prior_transform(u, fmax),
         ndim=7, nlive=50, bound="single", sample="rwalk",
         rstate=np.random.default_rng(seed))
-    # 50 puntos vivos, parada con dlogz <= 0.5 y 5000 iteraciones maximas (Apendice B);
-    # maxcall es un tope de seguridad anadido aqui para que ninguna curva se quede colgada.
+
     sampler.run_nested(dlogz=0.5, maxiter=5000, maxcall=150000, print_progress=False)
     res = sampler.results
     pesos = np.exp(res.logwt - res.logz[-1])
@@ -130,7 +127,7 @@ def procesa_objeto(nombre):
                       "p16": q[0].tolist(), "med": q[1].tolist(), "p84": q[2].tolist(),
                       "curve_fit": cf, "draws": np.round(muestras[idx], 5).tolist()}
         return out
-    except Exception as ex:           # una curva problematica no detiene el lote
+    except Exception as ex:          
         return {"NAME": nombre, "error": repr(ex)}
 
 
